@@ -6,6 +6,7 @@ import vueLogo from '../assets/vue.svg'
 
 const count = ref(0)
 </script>
+<style scoped lang="scss"></style>
 
 <template>
   <section id="center">
