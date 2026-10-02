@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import esriConfig from '@arcgis/core/config';
+import { facilityTypes, getClassColors } from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
 import MapView from '@arcgis/core/views/MapView';
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
@@ -10,76 +10,32 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 const mapContainer = ref<HTMLDivElement | null>(null);
 let view: MapView | undefined;
 
-const css = getComputedStyle(document.documentElement);
-const class1 = css.getPropertyValue('--color-class-1').trim();
-const class2 = css.getPropertyValue('--color-class-2').trim();
-const class3 = css.getPropertyValue('--color-class-3').trim();
-const class4 = css.getPropertyValue('--color-class-4').trim();
+const PLANNED_STATUS = 'PLANNED';
+const classColors = getClassColors();
 
 onMounted(() => {
     if (!mapContainer.value) return
 
-    const renderer = new UniqueValueRenderer({
-        field: 'Facility',
-        defaultSymbol: { type: 'simple-line', color: class1, width: 1 },
-        uniqueValueInfos: [
+        const renderer = new UniqueValueRenderer({
+        valueExpression: `
+            var planned = $feature.Status == "${PLANNED_STATUS}";
+            return $feature.Facility + "|" + IIF(planned, "planned", "active");
+        `,
+        valueExpressionTitle: 'Facility type and build status',
+        defaultSymbol: { type: 'simple-line', color: "#000000", width: 1 },
+        uniqueValueInfos: facilityTypes.flatMap((f) => [
             {
-            value: 'ABL',
-            label: 'Advisory Bike Lane',
-            symbol: { type: 'simple-line', color: class2, width: 2, style: 'solid' },
-            },    
-            {
-            value: 'BL',
-            label: 'Bike Lane',
-            symbol: { type: 'simple-line', color: class2, width: 2, style: 'solid' },
+                value: `${f.code}|active`,
+                label: f.name,
+                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'solid' },
             },
             {
-            value: 'BBBL',
-            label: 'Bike Lane Buffered by Bus Lane',
-            symbol: { type: 'simple-line', color: class2, width: 2, style: 'solid' },
+                value: `${f.code}|planned`,
+                label: `${f.name} (planned)`,
+                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'dash' },
             },
-            {
-            value: 'BBL',
-            label: 'Buffered Bike Lane',
-            symbol: { type: 'simple-line', color: class2, width: 2, style: 'solid' },
-            },
-            {
-            value: 'ESR',
-            label: 'Enhanced Shared Roadway',
-            symbol: { type: 'simple-line', color: class3, width: 2, style: 'solid' },
-            },
-            {
-            value: 'LSB',
-            label: 'Local Service Bikeway',
-            symbol: { type: 'simple-line', color: class3, width: 2, style: 'solid' },
-            },
-            {
-            value: 'NG',
-            label: 'Neighborhood Greenway',
-            symbol: { type: 'simple-line', color: class1, width: 2, style: 'solid' },
-            },
-            {
-            value: 'PBL',
-            label: 'Protected Bike Lane',
-            symbol: { type: 'simple-line', color: class4, width: 2, style: 'solid' },
-            },
-            {
-            value: 'SBBL',
-            label: 'Shared Bus-Bike Lane',
-            symbol: { type: 'simple-line', color: class2, width: 2, style: 'solid' },
-            },
-            {
-            value: 'SIR',
-            label: 'Separated in-roadway',
-            symbol: { type: 'simple-line', color: class4, width: 2, style: 'solid' },
-            },
-            {
-            value: 'TRL',
-            label: 'Off-Street Path/Trail',
-            symbol: { type: 'simple-line', color: class1, width: 2, style: 'solid' },
-            },
-        ],
-    });
+        ]),
+    })
 
     const bikeLayer = new GeoJSONLayer({
         url: '/bike-facilities.geojson',
@@ -127,5 +83,9 @@ onBeforeUnmount(() => {
     .bike-map, #bike-map-wrapper {
         width: 100%;
         height: 100%;
+    }
+
+    #bike-map-wrapper {
+        margin: 25px;
     }
 </style>
