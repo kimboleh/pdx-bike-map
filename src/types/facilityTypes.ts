@@ -20,6 +20,10 @@ export const facilityTypes: FacilityType[] = [
   { code: 'TRL',  name: 'Off-Street Path/Trail',           class: 1 },
 ];
 
+export const facilityNameByCode: Record<string, string> = Object.fromEntries(
+  facilityTypes.map((f) => [f.code, f.name]),
+);
+
 export function getClassColors(): Record<FacilityClass, string> {
   const css = getComputedStyle(document.documentElement);
   const read = (name: string) => css.getPropertyValue(name).trim();

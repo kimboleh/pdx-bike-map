@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { facilityTypes, getClassColors } from '../types/facilityTypes';
+import { facilityTypes, facilityNameByCode, getClassColors } from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
+import Graphic from '@arcgis/core/Graphic';
 import MapView from '@arcgis/core/views/MapView';
+import Extent from '@arcgis/core/geometry/Extent';
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
 import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -13,10 +15,19 @@ let view: MapView | undefined;
 const PLANNED_STATUS = 'PLANNED';
 const classColors = getClassColors();
 
+// values come from PortlandMaps data, converted to lat/long
+const portlandExtent = new Extent({
+    xmin: -122.84, // west
+    ymin: 45.42,   // south
+    xmax: -122.46, // east
+    ymax: 45.66,   // north
+    spatialReference: { wkid: 4326 },
+});
+
 onMounted(() => {
     if (!mapContainer.value) return
 
-        const renderer = new UniqueValueRenderer({
+    const renderer = new UniqueValueRenderer({
         valueExpression: `
             var planned = $feature.Status == "${PLANNED_STATUS}";
             return $feature.Facility + "|" + IIF(planned, "planned", "active");
@@ -40,10 +51,29 @@ onMounted(() => {
     const bikeLayer = new GeoJSONLayer({
         url: '/bike-facilities.geojson',
         title: 'Bike facilities',
+        outFields: ['*'],
         renderer,
         popupTemplate: {
             title: '{SegmentName}',
-            content: 'Type: {Facility}<br>Built: {YearBuilt}<br>Length: {LengthMiles} mi',
+            content: (event: { graphic: Graphic }) => {
+                const { Facility, Status, YearBuilt, LengthMiles } = event.graphic.attributes;
+                const container = document.createElement('div');
+
+                const lines = [
+                    `Type: ${facilityNameByCode[Facility] ?? Facility}`,
+                    `Status: ${Status === 'PLANNED' ? 'Planned' : 'Active'}`,
+                    ...(YearBuilt ? [`Built: ${YearBuilt}`] : []),
+                    `Length: ${LengthMiles} mi`,
+                ];
+
+                lines.forEach((text) => {
+                    const p = document.createElement('p');
+                    p.textContent = text;
+                    container.appendChild(p);
+                });
+
+                return container;
+            },
         },
     });
 
@@ -57,15 +87,18 @@ onMounted(() => {
         map,
         center: [-122.65, 45.52],
         zoom: 11,
+        extent: portlandExtent,
+        constraints: {
+            geometry: portlandExtent,
+            minZoom: 10, // stops zooming out past the region
+        },
     });
-
-    bikeLayer.queryFeatureCount().then((n) => console.log('features:', n));
-})
+});
 
 onBeforeUnmount(() => {
     view?.destroy()
     view = undefined
-})
+});
 </script>
 
 <template>
