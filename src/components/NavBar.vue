@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { NavLink } from '../types/nav';
-import logo from '../assets/img/vue.svg';
+import logo from '../assets/img/bikepdx.png';
 
 defineProps<{
   links: NavLink[]
