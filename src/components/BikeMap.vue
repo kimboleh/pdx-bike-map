@@ -10,10 +10,9 @@ import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
 
 const mapContainer = ref<HTMLDivElement | null>(null);
-let view: MapView | undefined;
-
 const PLANNED_STATUS = 'PLANNED';
 const classColors = getClassColors();
+let view: MapView | undefined;
 
 // values come from PortlandMaps data, converted to lat/long
 const portlandExtent = new Extent({
@@ -25,8 +24,9 @@ const portlandExtent = new Extent({
 });
 
 onMounted(() => {
-    if (!mapContainer.value) return
+    if (!mapContainer.value) return;
 
+    // render the facilities - solid lines if active, dashed lines if planned
     const renderer = new UniqueValueRenderer({
         valueExpression: `
             var planned = $feature.Status == "${PLANNED_STATUS}";
@@ -48,6 +48,7 @@ onMounted(() => {
         ]),
     })
 
+    // render the GeoJSON and create popups for each facility
     const bikeLayer = new GeoJSONLayer({
         url: '/bike-facilities.geojson',
         title: 'Bike facilities',
@@ -86,18 +87,20 @@ onMounted(() => {
         container: mapContainer.value,
         map,
         center: [-122.65, 45.52],
-        zoom: 11,
+        zoom: 14,
         extent: portlandExtent,
         constraints: {
             geometry: portlandExtent,
-            minZoom: 10, // stops zooming out past the region
+            minZoom: 11, // stops zooming out past the region
         },
     });
 });
 
+// saves memory by ensuring view gets
+// destroyed if it unmounts
 onBeforeUnmount(() => {
-    view?.destroy()
-    view = undefined
+    view?.destroy();
+    view = undefined;
 });
 </script>
 

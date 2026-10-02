@@ -6,6 +6,7 @@ export interface FacilityType {
   class: FacilityClass
 }
 
+// exports an object with the facility code, name, and class number
 export const facilityTypes: FacilityType[] = [
   { code: 'ABL',  name: 'Advisory Bike Lane',              class: 2 },
   { code: 'BL',   name: 'Bike Lane',                       class: 2 },
@@ -20,10 +21,12 @@ export const facilityTypes: FacilityType[] = [
   { code: 'TRL',  name: 'Off-Street Path/Trail',           class: 1 },
 ];
 
+// exports a map with facility shortcodes and full names
 export const facilityNameByCode: Record<string, string> = Object.fromEntries(
   facilityTypes.map((f) => [f.code, f.name]),
 );
 
+// exports an object with the colors for each "class" of bike facility
 export function getClassColors(): Record<FacilityClass, string> {
   const css = getComputedStyle(document.documentElement);
   const read = (name: string) => css.getPropertyValue(name).trim();
