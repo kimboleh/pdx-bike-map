@@ -12,6 +12,13 @@ $color-secondary--royalBlue: #3862AE;
 $color-secondary--orange: #F3735A;
 $color-secondary--red: #F0565F;
 
+:root {
+  --color-class-1: #{$color-secondary--teal};
+  --color-class-2: #{$color-secondary--orange};
+  --color-class-3: #{$color-secondary--royalBlue};
+  --color-class-4: #{$color-secondary--green};
+}
+
 /* FONTS */
 @font-face {
   font-family: "Raleway";

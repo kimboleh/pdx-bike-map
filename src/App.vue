@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue';
+import BikeMap from './components/BikeMap.vue';
 import NavBar from './components/NavBar.vue';
 import type { NavLink } from './types/nav';
 
@@ -11,7 +11,9 @@ const links: NavLink[] = [
 
 <template>
   <NavBar :links="links">
-    <template #brand>Bike PDX</template>
+    <template #brand>
+      <span id="site-title">Bike PDX</span>
+    </template>
   </NavBar>
-  <HelloWorld />
+  <BikeMap />
 </template>
