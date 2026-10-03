@@ -12,6 +12,17 @@ $color-secondary--royalBlue: #3862AE;
 $color-secondary--orange: #F3735A;
 $color-secondary--red: #F0565F;
 
+/* SIZING */
+// because magic numbers are bad!
+$footer-height: 68px;
+$header-height: 63px;
+$map-margin-default: 100px;
+$map-margin-tablet: 50px;
+$map-margin-mobile: 20px;
+
+$width--tablet: 768px;
+$width--mobile: 450px;
+
 :root {
   --color-class-1: #{$color-secondary--teal};
   --color-class-2: #{$color-secondary--orange};

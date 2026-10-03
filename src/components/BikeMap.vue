@@ -46,7 +46,7 @@ onMounted(() => {
                 symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'dash' },
             },
         ]),
-    })
+    });
 
     // render the GeoJSON and create popups for each facility
     const bikeLayer = new GeoJSONLayer({
@@ -81,7 +81,7 @@ onMounted(() => {
     const map = new EsriMap({
         basemap: 'osm',
         layers: [bikeLayer],
-    })
+    });
 
     view = new MapView({
         container: mapContainer.value,
@@ -105,6 +105,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+    <div id="filter-sidebar">
+        <h3>Filter Facilities</h3>
+    </div>
     <div id="bike-map-wrapper">
         <div
             ref="mapContainer"
@@ -114,14 +117,3 @@ onBeforeUnmount(() => {
         ></div>
     </div>
 </template>
-
-<style scoped lang="scss">
-    .bike-map, #bike-map-wrapper {
-        width: 100%;
-        height: 100%;
-    }
-
-    #bike-map-wrapper {
-        margin: 25px;
-    }
-</style>
