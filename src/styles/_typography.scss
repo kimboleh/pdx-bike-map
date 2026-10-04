@@ -38,6 +38,27 @@ p {
     margin: 0;
 }
 
+/* SITE TITLE AND NAV */
 #site-title {
+    color: $color-secondary--green;
+    font-weight: 700;
     font-size: 42px;
+}
+
+.nav-bar__list {
+    a {
+        color: $color--dark;
+        text-decoration: none;
+        font-size: 18px;
+
+        &:hover {
+            color: $color-primary--accent;
+        }
+
+        &[aria-current='page'] {
+            color: $color-primary--teal;
+            font-weight: 700;
+            &:hover { color: $color-primary--accent; }
+        }
+    }
 }

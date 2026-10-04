@@ -23,25 +23,3 @@ defineProps<{
     </ul>
   </nav>
 </template>
-
-<style scoped lang="scss">
-.nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-
-  &__list {
-    display: flex;
-    gap: 1.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  a[aria-current='page'] {
-    font-weight: 700;
-    text-decoration: underline;
-  }
-}
-</style>

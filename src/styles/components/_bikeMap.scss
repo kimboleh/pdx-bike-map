@@ -3,18 +3,21 @@
 .bike-map, #bike-map-wrapper {
     width: 100%;
     height: 100%;
-    max-width: 80vw;
     margin: auto;
 }
 
 #bike-map-wrapper {
-    padding: 10px $map-margin-default;
+    max-width: calc(100% - 2 * $map-margin-default);
+    padding: 0px $map-margin-default $footer-height $map-margin-default;
+
     @media (max-width: $width--tablet) {
-        padding: 10px $map-margin-tablet;
+        max-width: calc(100vw - 2 * $map-margin-tablet);
+        padding: 10px $map-margin-tablet $footer-height $map-margin-tablet;
     }
 
     @media (max-width: $width--mobile) {
-        padding: 10px $map-margin-mobile;
+        max-width: calc(100vw - 2 * $map-margin-mobile);
+        padding: 10px $map-margin-mobile $footer-height $map-margin-mobile;
     }
 }
 
@@ -25,7 +28,7 @@
 #filter-sidebar {
     position: absolute;
     right: calc($map-margin-default + 10px);
-    margin-top: $header-height;
+    margin-top: calc($header-height + 20px);
     z-index: 10;
 
     .filters {

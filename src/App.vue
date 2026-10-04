@@ -16,4 +16,7 @@ const links: NavLink[] = [
     </template>
   </NavBar>
   <BikeMap />
+  <div id="footer-text">
+      coded by <a href="https://github.com/kimboleh">Kimberly Nachbur</a> | last updated 10.4.2026
+  </div>
 </template>

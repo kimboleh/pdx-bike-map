@@ -1,8 +1,9 @@
 @use 'variables' as *;
 @use 'typography' as *;
 @use 'components/bikeMap';
+@use 'components/navBar';
 
-html, body, #app {
+html, body {
   height: 100%;
   margin: 0;
 }
@@ -14,10 +15,29 @@ body {
 
 #app {
   width: 100%;
-  max-width: 100%;
+  height: 100%;
+  max-width: 1400px;
   margin: 0 auto;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+#footer-text {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 5px 20px;
+
+  color: $color-secondary--teal;
+  font-size: .75em;
+
+  a {
+    color: $color-primary--teal;
+    text-decoration: dotted;
+
+    &:hover { color: $color-primary--accent; text-decoration: underline; }
+    &:visited { color: $color-secondary--green; }
+  }
 }
