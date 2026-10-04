@@ -1,4 +1,5 @@
-export type FacilityClass = 1 | 2 | 3 | 4;
+export const facilityClasses = [1, 2, 3, 4] as const;
+export type FacilityClass = (typeof facilityClasses)[number];
 
 export interface FacilityType {
   code: string,
@@ -37,3 +38,19 @@ export function getClassColors(): Record<FacilityClass, string> {
     4: read('--color-class-4'),
   }
 }
+
+export interface FacilityGroup {
+    class: FacilityClass,
+    name: string,
+    codes: string[]
+}
+
+// each class with its name and included facility codes, for grouped UI like the filter box
+export const facilityGroups: FacilityGroup[] = [
+    { class: 1, name: "Trails and Greenways", codes: ["NG", "TRL"] },
+    { class: 2, name: "Bike Lanes", codes: ["ABL", "BBBL", "BL", "BBL", "SBBL"] },
+    { class: 3, name: "Shared Roads", codes: ["ESR", "LSB"] },
+    { class: 4, name: "Protected Bike Lanes", codes: ["PBL", "SIR"] }
+];
+
+export const allFacilityCodes: string[] = facilityTypes.map((f) => f.code);

@@ -31,10 +31,31 @@
     .filters {
         background-color: $color--white;
         border: solid $color--dark 1px;
+        padding: 20px;
+
+        legend {
+            text-align: center;
+            text-transform: capitalize;
+        }
+
+        &__all {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+
+            h3 {
+                margin: 10px 0;
+            }
+        }
         
         &__group {
             display: flex;
             flex-direction: column;
+        }
+
+        &__type {
+            padding-left: 15px;
         }
     }
 

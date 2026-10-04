@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { facilityTypes, facilityNameByCode, getClassColors } from '../types/facilityTypes';
+import {
+    facilityTypes,
+    facilityGroups,
+    allFacilityCodes,
+    facilityNameByCode,
+    getClassColors,
+    type FacilityGroup,
+} from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
 import Graphic from '@arcgis/core/Graphic';
 import MapView from '@arcgis/core/views/MapView';
@@ -9,16 +16,11 @@ import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
 import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
 
-import type { FacilityClass } from '../types/facilityTypes';
-
 const mapContainer = ref<HTMLDivElement | null>(null);
 const classColors = getClassColors();
-const visibleCodes = ref<string[]>(facilityTypes.map((f) => f.code));
-const classes: FacilityClass[] = [1, 2, 3, 4];
-const groups = classes.map((c) => ({
-    class: c,
-    types: facilityTypes.filter((f) => f.class === c),
-}));
+const visibleCodes = ref<string[]>([...allFacilityCodes]);
+const allOn = (g: FacilityGroup) => g.codes.every((c) => visibleCodes.value.includes(c));
+const someOn = (g: FacilityGroup) => g.codes.some((c) => visibleCodes.value.includes(c));
 
 let view: MapView | undefined;
 let bikeLayer: GeoJSONLayer | undefined;
@@ -32,19 +34,24 @@ const portlandExtent = new Extent({
     spatialReference: { wkid: 4326 },
 });
 
+// shows or hides all facility groups within a given class
+function toggleGroup(g: FacilityGroup, on: boolean) {
+  const rest = visibleCodes.value.filter((c) => !g.codes.includes(c));
+  visibleCodes.value = on ? [...rest, ...g.codes] : rest;
+}
+
 // returns a SQL statement specifying which facility codes should be visible
 function buildWhere(): string {
-    if (visibleCodes.value.length === facilityTypes.length) return '1=1';
-    if (visibleCodes.value.length === 0) return '1=0';
-    const list = visibleCodes.value.map((c) => `'${c}'`).join(', ');
-    return `Facility IN (${list})`;
+  if (visibleCodes.value.length === allFacilityCodes.length) return '1=1';
+  if (visibleCodes.value.length === 0) return '1=0';
+  return `Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`;
 }
 
 // sets the new data in the layer and updates result count
 async function applyFilter() {
-    if (!bikeLayer) return;
+  if (bikeLayer) {
     bikeLayer.definitionExpression = buildWhere();
-    resultCount.value = await bikeLayer.queryFeatureCount().catch(() => null);
+  }
 }
 
 // watches for a change & updates whenever checkboxes are changed
@@ -135,18 +142,30 @@ onBeforeUnmount(() => {
 <template>
     <div id="filter-sidebar">
         <fieldset class="filters">
-            <h3><legend>Filter facility types</legend></h3>
+            <h2><legend>Filter facility types</legend></h2>
+            <!- Loop through each class in facilityGroups ->
             <div
-                v-for="group in groups"
+                v-for="group in facilityGroups"
                 :key="group.class"
                 class="filters__group"
                 role="group"
                 :aria-labelledby="`class-${group.class}-heading`"
             >
-                <h3 :id="`class-${group.class}-heading`">Class {{ group.class }}</h3>
-                <label v-for="f in group.types" :key="f.code">
-                <input type="checkbox" :value="f.code" v-model="visibleCodes" />
-                {{ f.name }}
+                <!- Add the class's heading ->
+                <label class="filters__all">
+                    <input
+                        type="checkbox"
+                        :checked="allOn(group)"
+                        :indeterminate="someOn(group) && !allOn(group)"
+                        @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
+                    />
+                    <h3 :id="`class-${group.class}-heading`">{{ group.name }}</h3>
+                </label>
+
+                <!- Loop through each class's facility types, then add them with their own checkboxes ->
+                <label v-for="code in group.codes" :key="code" class="filters__type">
+                    <input type="checkbox" :value="code" v-model="visibleCodes" />
+                    {{ facilityNameByCode[code] }}
                 </label>
             </div>
         </fieldset>
