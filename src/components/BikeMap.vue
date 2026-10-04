@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { facilityTypes, facilityNameByCode, getClassColors } from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
 import Graphic from '@arcgis/core/Graphic';
@@ -12,7 +12,11 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 const mapContainer = ref<HTMLDivElement | null>(null);
 const PLANNED_STATUS = 'PLANNED';
 const classColors = getClassColors();
+const visibleCodes = ref<string[]>(facilityTypes.map((f) => f.code));
+const resultCount = ref<number | null>(null);
+
 let view: MapView | undefined;
+let bikeLayer: GeoJSONLayer | undefined;
 
 // values come from PortlandMaps data, converted to lat/long
 const portlandExtent = new Extent({
@@ -22,6 +26,24 @@ const portlandExtent = new Extent({
     ymax: 45.66,   // north
     spatialReference: { wkid: 4326 },
 });
+
+// returns a SQL statement specifying which facility codes should be visible
+function buildWhere(): string {
+    if (visibleCodes.value.length === facilityTypes.length) return '1=1';
+    if (visibleCodes.value.length === 0) return '1=0';
+    const list = visibleCodes.value.map((c) => `'${c}'`).join(', ');
+    return `Facility IN (${list})`;
+}
+
+// sets the new data to the layer and updates result count
+async function applyFilter() {
+    if (!bikeLayer) return;
+    bikeLayer.definitionExpression = buildWhere();
+    resultCount.value = await bikeLayer.queryFeatureCount().catch(() => null);
+}
+
+// watches for a change & updates whenever checkboxes are changed
+watch(visibleCodes, applyFilter);
 
 onMounted(() => {
     if (!mapContainer.value) return;
@@ -49,7 +71,7 @@ onMounted(() => {
     });
 
     // render the GeoJSON and create popups for each facility
-    const bikeLayer = new GeoJSONLayer({
+    bikeLayer = new GeoJSONLayer({
         url: '/bike-facilities.geojson',
         title: 'Bike facilities',
         outFields: ['*'],
@@ -101,12 +123,20 @@ onMounted(() => {
 onBeforeUnmount(() => {
     view?.destroy();
     view = undefined;
+    bikeLayer = undefined;
 });
 </script>
 
 <template>
     <div id="filter-sidebar">
-        <h3>Filter Facilities</h3>
+        <fieldset class="filters">
+            <h3><legend>Filter facility types</legend></h3>
+            <label v-for="f in facilityTypes" :key="f.code">
+                <input type="checkbox" :value="f.code" v-model="visibleCodes" />
+                {{ f.name }}
+            </label>
+            <p aria-live="polite">{{ resultCount ?? '...' }} segments shown</p>
+        </fieldset>
     </div>
     <div id="bike-map-wrapper">
         <div

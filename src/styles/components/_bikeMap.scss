@@ -23,14 +23,18 @@
 }
 
 #filter-sidebar {
-    background-color: $color--white;
-    border: solid $color--dark 1px;
-    display: flex;
-    flex-direction: column;
     position: absolute;
     right: calc($map-margin-default + 10px);
     margin-top: $header-height;
     z-index: 10;
+
+    .filters {
+        background-color: $color--white;
+        border: solid $color--dark 1px;
+        
+        display: flex;
+        flex-direction: column;
+    }
 
     @media (max-width: $width--tablet) {
         right: calc($map-margin-tablet + 10px);
