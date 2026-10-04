@@ -32,8 +32,10 @@
         background-color: $color--white;
         border: solid $color--dark 1px;
         
-        display: flex;
-        flex-direction: column;
+        &__group {
+            display: flex;
+            flex-direction: column;
+        }
     }
 
     @media (max-width: $width--tablet) {

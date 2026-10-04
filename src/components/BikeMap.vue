@@ -9,11 +9,17 @@ import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
 import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
 
+import type { FacilityClass } from '../types/facilityTypes';
+
 const mapContainer = ref<HTMLDivElement | null>(null);
-const PLANNED_STATUS = 'PLANNED';
 const classColors = getClassColors();
 const visibleCodes = ref<string[]>(facilityTypes.map((f) => f.code));
 const resultCount = ref<number | null>(null);
+const classes: FacilityClass[] = [1, 2, 3, 4];
+const groups = classes.map((c) => ({
+    class: c,
+    types: facilityTypes.filter((f) => f.class === c),
+}));
 
 let view: MapView | undefined;
 let bikeLayer: GeoJSONLayer | undefined;
@@ -35,7 +41,7 @@ function buildWhere(): string {
     return `Facility IN (${list})`;
 }
 
-// sets the new data to the layer and updates result count
+// sets the new data in the layer and updates result count
 async function applyFilter() {
     if (!bikeLayer) return;
     bikeLayer.definitionExpression = buildWhere();
@@ -51,7 +57,7 @@ onMounted(() => {
     // render the facilities - solid lines if active, dashed lines if planned
     const renderer = new UniqueValueRenderer({
         valueExpression: `
-            var planned = $feature.Status == "${PLANNED_STATUS}";
+            var planned = $feature.Status == "PLANNED";
             return $feature.Facility + "|" + IIF(planned, "planned", "active");
         `,
         valueExpressionTitle: 'Facility type and build status',
@@ -118,7 +124,7 @@ onMounted(() => {
     });
 });
 
-// saves memory by ensuring view gets
+// saves memory by ensuring view + layer get
 // destroyed if it unmounts
 onBeforeUnmount(() => {
     view?.destroy();
@@ -131,10 +137,19 @@ onBeforeUnmount(() => {
     <div id="filter-sidebar">
         <fieldset class="filters">
             <h3><legend>Filter facility types</legend></h3>
-            <label v-for="f in facilityTypes" :key="f.code">
+            <div
+                v-for="group in groups"
+                :key="group.class"
+                class="filters__group"
+                role="group"
+                :aria-labelledby="`class-${group.class}-heading`"
+            >
+                <h3 :id="`class-${group.class}-heading`">Class {{ group.class }}</h3>
+                <label v-for="f in group.types" :key="f.code">
                 <input type="checkbox" :value="f.code" v-model="visibleCodes" />
                 {{ f.name }}
-            </label>
+                </label>
+            </div>
             <p aria-live="polite">{{ resultCount ?? '...' }} segments shown</p>
         </fieldset>
     </div>
