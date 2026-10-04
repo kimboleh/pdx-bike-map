@@ -14,7 +14,6 @@ import type { FacilityClass } from '../types/facilityTypes';
 const mapContainer = ref<HTMLDivElement | null>(null);
 const classColors = getClassColors();
 const visibleCodes = ref<string[]>(facilityTypes.map((f) => f.code));
-const resultCount = ref<number | null>(null);
 const classes: FacilityClass[] = [1, 2, 3, 4];
 const groups = classes.map((c) => ({
     class: c,
@@ -150,7 +149,6 @@ onBeforeUnmount(() => {
                 {{ f.name }}
                 </label>
             </div>
-            <p aria-live="polite">{{ resultCount ?? '...' }} segments shown</p>
         </fieldset>
     </div>
     <div id="bike-map-wrapper">
