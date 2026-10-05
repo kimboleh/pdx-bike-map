@@ -1,12 +1,23 @@
-# Vue 3 + TypeScript + Vite
+# Bike PDX
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This project was created as a take-home interview assessment for Alta Planning + Design.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Running the project
+
+**Prerequisites:** Docker with Compose v2 (the `docker compose` command).
+
+1. From the repository folder, run `docker compose up`.
+2. Wait for the dependencies to install. (This takes a minute or two on the first run, so the map & facility lines may not load right away.)
+3. Open [http://localhost:5173](http://localhost:5173).
+
+To stop the app, press `Ctrl+C`, then run `docker compose down`.
+
+## Tech stack
+
+Vue 3, TypeScript, Vite, SCSS, ArcGIS Maps SDK for JavaScript, Docker Compose.
 
 ## Generative AI Use
 
 As per project directions, I am disclosing my use of generative AI here!
 
-The model I've used for occasional assistance has been Claude's Sonnet 5.5. Use includes:
-- Assistance with initial project structure (folder hierarchy, docker-compose, etc.)
+The model I've used for some assistance has been Claude's Sonnet 5.5, via the claude.ai chat interface.
