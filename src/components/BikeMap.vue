@@ -196,4 +196,31 @@ onBeforeUnmount(() => {
             aria-label="Map of Portland bike facilities"
         ></div>
     </div>
+    <div class="map-legend" role="group" aria-labelledby="legend-heading">
+        <h2 id="legend-heading" class="map-legend__title">Legend</h2>
+
+        <ul class="map-legend__list">
+            <li v-for="group in facilityGroups" :key="group.class">
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" :class="`legend-stroke--class-${group.class}`" />
+            </svg>
+            {{ group.name }}
+            </li>
+        </ul>
+
+        <ul class="map-legend__list">
+            <li>
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" />
+            </svg>
+            Active
+            </li>
+            <li>
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" stroke-dasharray="6 4" />
+            </svg>
+            Planned
+            </li>
+        </ul>
+    </div>
 </template>

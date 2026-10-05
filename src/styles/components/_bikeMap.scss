@@ -80,6 +80,8 @@
     .filters {
         background-color: $color--grey;
         border: solid $color--dark 1px;
+        border-left: none;
+        margin: 0;
         padding: 20px;
 
         legend {
@@ -114,6 +116,12 @@
             align-items: center;
             padding-left: 15px;
             gap: 5px;
+            font-size: 16px;
+
+            input[type="checkbox"] {
+                width: 15px;
+                height: 15px;
+            }
         }
     }
 
@@ -123,4 +131,61 @@
     @media (max-width: $width--mobile) {
         right: calc($map-margin-mobile + 10px);
     }
+}
+
+/* LEGEND */
+
+.map-legend {
+    position: absolute;
+    right: 10px;
+    bottom: 30px;
+    z-index: 10;
+    padding: 10px 12px;
+    background-color: $color--grey;
+    border: solid $color--dark 1px;
+    font-size: 0.85rem;
+
+    &__title {
+        margin: 0 0 6px;
+        font-size: 16px;
+    }
+
+    &__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & + & {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: solid $color--dark 1px;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.6;
+        }
+    }
+
+    &__line {
+        flex: none;
+        width: 32px;
+        height: 4px;
+
+        line {
+            stroke-width: 3;
+        }
+    }
+}
+
+@for $i from 1 through 4 {
+    .legend-stroke--class-#{$i} {
+        stroke: var(--color-class-#{$i});
+    }
+}
+
+.legend-stroke--status {
+    stroke: $color--dark;
 }
