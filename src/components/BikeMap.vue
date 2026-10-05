@@ -36,22 +36,22 @@ const portlandExtent = new Extent({
 
 // shows or hides all facility groups within a given class
 function toggleGroup(g: FacilityGroup, on: boolean) {
-  const rest = visibleCodes.value.filter((c) => !g.codes.includes(c));
-  visibleCodes.value = on ? [...rest, ...g.codes] : rest;
+    const rest = visibleCodes.value.filter((c) => !g.codes.includes(c));
+    visibleCodes.value = on ? [...rest, ...g.codes] : rest;
 }
 
 // returns a SQL statement specifying which facility codes should be visible
 function buildWhere(): string {
-  if (visibleCodes.value.length === allFacilityCodes.length) return '1=1';
-  if (visibleCodes.value.length === 0) return '1=0';
-  return `Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`;
+    if (visibleCodes.value.length === allFacilityCodes.length) return '1=1';
+    if (visibleCodes.value.length === 0) return '1=0';
+    return `Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`;
 }
 
 // sets the new data in the layer and updates result count
 async function applyFilter() {
-  if (bikeLayer) {
-    bikeLayer.definitionExpression = buildWhere();
-  }
+    if (bikeLayer) {
+        bikeLayer.definitionExpression = buildWhere();
+    }
 }
 
 // watches for a change & updates whenever checkboxes are changed
@@ -128,6 +128,8 @@ onMounted(() => {
             minZoom: 11, // stops zooming out past the region
         },
     });
+
+    view.ui.move("zoom", "bottom-right");
 });
 
 // saves memory by ensuring view + layer get

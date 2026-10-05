@@ -6,33 +6,37 @@
     margin: auto;
 }
 
-#bike-map-wrapper {
-    max-width: calc(100% - 2 * $map-margin-default);
-    padding: 0px $map-margin-default $footer-height $map-margin-default;
-
-    @media (max-width: $width--tablet) {
-        max-width: calc(100vw - 2 * $map-margin-tablet);
-        padding: 10px $map-margin-tablet $footer-height $map-margin-tablet;
-    }
-
-    @media (max-width: $width--mobile) {
-        max-width: calc(100vw - 2 * $map-margin-mobile);
-        padding: 10px $map-margin-mobile $footer-height $map-margin-mobile;
-    }
-}
-
-.bike-map {
-    border: solid $color--dark 1px;
-}
-
 #filter-sidebar {
     position: absolute;
-    right: calc($map-margin-default + 10px);
+    left: 0;
     margin-top: calc($header-height + 20px);
+    max-width: 300px;
     z-index: 10;
 
+    input[type="checkbox"] {
+        box-sizing: border-box;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 2px solid $color-secondary--navy;
+        appearance: none;
+        background-color: transparent;
+        outline: none;
+        transition: outline 0.1s;
+    }
+
+    input[type="checkbox"]:checked {
+        background-size: cover;
+        padding: 2px;
+    }
+
+    input[type="checkbox"]:not(:disabled):checked {
+        border-color: var(--checkbox-checked-color);
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" viewBox="0 0 32 32" xml:space="preserve"><path style="fill: %23274c77" d="M11.941,28.877l-11.941-11.942l5.695-5.696l6.246,6.246l14.364-14.364L32,8.818"/></svg>');
+    }
+
     .filters {
-        background-color: $color--white;
+        background-color: $color--grey;
         border: solid $color--dark 1px;
         padding: 20px;
 
@@ -50,6 +54,11 @@
             h3 {
                 margin: 10px 0;
             }
+
+            #class-1-heading { color: var(--color-class-1); }
+            #class-2-heading { color: var(--color-class-2); }
+            #class-3-heading { color: var(--color-class-3); }
+            #class-4-heading { color: $color-primary--teal; } // for better contrast
         }
         
         &__group {
@@ -58,7 +67,11 @@
         }
 
         &__type {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
             padding-left: 15px;
+            gap: 5px;
         }
     }
 

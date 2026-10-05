@@ -43,12 +43,14 @@ p {
     color: $color-secondary--green;
     font-weight: 700;
     font-size: 42px;
+    text-shadow: 3px 3px 10px $color--white;
 }
 
 .nav-bar__list {
     a {
         color: $color--dark;
         text-decoration: none;
+        text-shadow: 3px 3px 10px $color--white;
         font-size: 18px;
 
         &:hover {
