@@ -89,6 +89,21 @@
             text-transform: capitalize;
         }
 
+        &__planned {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: solid $color--dark 1px;
+            font-style: italic;
+
+            input[type="checkbox"] {
+                width: 15px;
+                height: 15px;
+            }
+        }
+
         &__all {
             display: flex;
             flex-direction: row;

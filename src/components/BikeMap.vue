@@ -19,6 +19,7 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 const mapContainer = ref<HTMLDivElement | null>(null);
 const classColors = getClassColors();
 const visibleCodes = ref<string[]>([...allFacilityCodes]);
+const showPlanned = ref(true);
 const isFilterOpen = ref(true);
 const allOn = (g: FacilityGroup) => g.codes.every((c) => visibleCodes.value.includes(c));
 const someOn = (g: FacilityGroup) => g.codes.some((c) => visibleCodes.value.includes(c));
@@ -43,9 +44,18 @@ function toggleGroup(g: FacilityGroup, on: boolean) {
 
 // returns a SQL statement specifying which facility codes should be visible
 function buildWhere(): string {
-    if (visibleCodes.value.length === allFacilityCodes.length) return '1=1';
     if (visibleCodes.value.length === 0) return '1=0';
-    return `Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`;
+
+    const clauses: string[] = [];
+
+    if (visibleCodes.value.length < allFacilityCodes.length) {
+        clauses.push(`Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`);
+    }
+    if (!showPlanned.value) {
+        clauses.push(`Status <> 'PLANNED'`);
+    }
+
+    return clauses.length ? clauses.join(' AND ') : '1=1';
 }
 
 // sets the new data in the layer and updates result count
@@ -56,7 +66,7 @@ async function applyFilter() {
 }
 
 // watches for a change & updates whenever checkboxes are changed
-watch(visibleCodes, applyFilter);
+watch([visibleCodes, showPlanned], applyFilter);
 
 onMounted(() => {
     if (!mapContainer.value) return;
@@ -78,7 +88,7 @@ onMounted(() => {
             {
                 value: `${f.code}|planned`,
                 label: `${f.name} (planned)`,
-                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'dash' },
+                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'long-dash' },
             },
         ]),
     });
@@ -147,6 +157,12 @@ onBeforeUnmount(() => {
         <div id="filter-panel" class="filter-panel">
             <fieldset class="filters">
                 <h2><legend>Filter facility types</legend></h2>
+
+                <!- Toggle planned routes on/off ->
+                <label class="filters__planned">
+                    <input type="checkbox" v-model="showPlanned" />
+                    Show planned routes
+                </label>
                 <!- Loop through each class in facilityGroups ->
                 <div
                     v-for="group in facilityGroups"
