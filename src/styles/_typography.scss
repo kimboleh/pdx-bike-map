@@ -43,12 +43,15 @@ p {
     color: $color-secondary--green;
     font-weight: 700;
     font-size: 42px;
+    text-shadow: 3px 3px 10px $color--white;
 }
 
+/* old styling for links in the nav bar - I thought about adding an "about" page but ran out of time! */
 .nav-bar__list {
     a {
         color: $color--dark;
         text-decoration: none;
+        text-shadow: 3px 3px 10px $color--white;
         font-size: 18px;
 
         &:hover {

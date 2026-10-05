@@ -14,12 +14,5 @@ defineProps<{
         <img :src="logo" class="base" width="50" height="50" alt="" />
       <slot name="brand" />
     </div>
-    <ul class="nav-bar__list">
-      <li v-for="link in links" :key="link.href">
-        <a :href="link.href" :aria-current="link.current ? 'page' : undefined">
-          {{ link.label }}
-        </a>
-      </li>
-    </ul>
   </nav>
 </template>

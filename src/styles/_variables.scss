@@ -7,6 +7,7 @@ $color--grey: #EAE8E9;
 
 $color-secondary--teal: #4BC0B1;
 $color-secondary--green: #005152;
+$color-secondary-olive-green: #345511;
 $color-secondary--navy: #424963;
 $color-secondary--royalBlue: #3862AE;
 $color-secondary--orange: #F3735A;
@@ -24,10 +25,10 @@ $width--tablet: 768px;
 $width--mobile: 450px;
 
 :root {
-  --color-class-1: #{$color-secondary--teal};
-  --color-class-2: #{$color-secondary--orange};
-  --color-class-3: #{$color-secondary--royalBlue};
-  --color-class-4: #{$color-secondary--green};
+  --color-class-1: #{$color-secondary-olive-green};
+  --color-class-2: #{$color-secondary--royalBlue};
+  --color-class-3: #{$color-secondary--orange};
+  --color-class-4: #{$color-secondary--teal};
 }
 
 /* FONTS */

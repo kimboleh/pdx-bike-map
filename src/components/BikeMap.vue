@@ -6,12 +6,14 @@ import {
     allFacilityCodes,
     facilityNameByCode,
     getClassColors,
+    PLANNED_OPACITY,
     type FacilityGroup,
 } from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
 import Graphic from '@arcgis/core/Graphic';
 import MapView from '@arcgis/core/views/MapView';
 import Extent from '@arcgis/core/geometry/Extent';
+import Color from '@arcgis/core/Color';
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
 import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -19,6 +21,8 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 const mapContainer = ref<HTMLDivElement | null>(null);
 const classColors = getClassColors();
 const visibleCodes = ref<string[]>([...allFacilityCodes]);
+const showPlanned = ref(true);
+const isFilterOpen = ref(true);
 const allOn = (g: FacilityGroup) => g.codes.every((c) => visibleCodes.value.includes(c));
 const someOn = (g: FacilityGroup) => g.codes.some((c) => visibleCodes.value.includes(c));
 
@@ -34,28 +38,44 @@ const portlandExtent = new Extent({
     spatialReference: { wkid: 4326 },
 });
 
+// helper method to convert a hex code color into an ArcGIS Color
+const withAlpha = (css: string, alpha: number) => {
+    const c = new Color(css);
+    c.a = alpha;
+    return c;
+}
+
 // shows or hides all facility groups within a given class
 function toggleGroup(g: FacilityGroup, on: boolean) {
-  const rest = visibleCodes.value.filter((c) => !g.codes.includes(c));
-  visibleCodes.value = on ? [...rest, ...g.codes] : rest;
+    const rest = visibleCodes.value.filter((c) => !g.codes.includes(c));
+    visibleCodes.value = on ? [...rest, ...g.codes] : rest;
 }
 
 // returns a SQL statement specifying which facility codes should be visible
 function buildWhere(): string {
-  if (visibleCodes.value.length === allFacilityCodes.length) return '1=1';
-  if (visibleCodes.value.length === 0) return '1=0';
-  return `Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`;
+    if (visibleCodes.value.length === 0) return '1=0';
+
+    const clauses: string[] = [];
+
+    if (visibleCodes.value.length < allFacilityCodes.length) {
+        clauses.push(`Facility IN (${visibleCodes.value.map((c) => `'${c}'`).join(', ')})`);
+    }
+    if (!showPlanned.value) {
+        clauses.push(`Status <> 'PLANNED'`);
+    }
+
+    return clauses.length ? clauses.join(' AND ') : '1=1';
 }
 
 // sets the new data in the layer and updates result count
 async function applyFilter() {
-  if (bikeLayer) {
-    bikeLayer.definitionExpression = buildWhere();
-  }
+    if (bikeLayer) {
+        bikeLayer.definitionExpression = buildWhere();
+    }
 }
 
 // watches for a change & updates whenever checkboxes are changed
-watch(visibleCodes, applyFilter);
+watch([visibleCodes, showPlanned], applyFilter);
 
 onMounted(() => {
     if (!mapContainer.value) return;
@@ -77,7 +97,12 @@ onMounted(() => {
             {
                 value: `${f.code}|planned`,
                 label: `${f.name} (planned)`,
-                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'dash' },
+                symbol: {
+                    type: 'simple-line',
+                    color: withAlpha(classColors[f.class], PLANNED_OPACITY),
+                    width: 3,
+                    style: 'long-dash',
+                },
             },
         ]),
     });
@@ -128,6 +153,8 @@ onMounted(() => {
             minZoom: 11, // stops zooming out past the region
         },
     });
+
+    view.ui.move("zoom", "bottom-right");
 });
 
 // saves memory by ensuring view + layer get
@@ -140,35 +167,56 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div id="filter-sidebar">
-        <fieldset class="filters">
-            <h2><legend>Filter facility types</legend></h2>
-            <!- Loop through each class in facilityGroups ->
-            <div
-                v-for="group in facilityGroups"
-                :key="group.class"
-                class="filters__group"
-                role="group"
-                :aria-labelledby="`class-${group.class}-heading`"
-            >
-                <!- Add the class's heading ->
-                <label class="filters__all">
-                    <input
-                        type="checkbox"
-                        :checked="allOn(group)"
-                        :indeterminate="someOn(group) && !allOn(group)"
-                        @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
-                    />
-                    <h3 :id="`class-${group.class}-heading`">{{ group.name }}</h3>
-                </label>
+    <div id="filter-sidebar" :class="{ 'is-open': isFilterOpen }">
+        <div id="filter-panel" class="filter-panel">
+            <fieldset class="filters">
+                <h2><legend>Filter facility types</legend></h2>
 
-                <!- Loop through each class's facility types, then add them with their own checkboxes ->
-                <label v-for="code in group.codes" :key="code" class="filters__type">
-                    <input type="checkbox" :value="code" v-model="visibleCodes" />
-                    {{ facilityNameByCode[code] }}
+                <!- Toggle planned routes on/off ->
+                <label class="filters__planned">
+                    <input type="checkbox" v-model="showPlanned" />
+                    Show planned routes
                 </label>
-            </div>
-        </fieldset>
+                <!- Loop through each class in facilityGroups ->
+                <div
+                    v-for="group in facilityGroups"
+                    :key="group.class"
+                    class="filters__group"
+                    role="group"
+                    :aria-labelledby="`class-${group.class}-heading`"
+                >
+                    <!- Add the class's heading ->
+                    <label class="filters__all">
+                        <input
+                            type="checkbox"
+                            :checked="allOn(group)"
+                            :indeterminate="someOn(group) && !allOn(group)"
+                            @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
+                        />
+                        <h3 :id="`class-${group.class}-heading`">{{ group.name }}</h3>
+                    </label>
+
+                    <!- Loop through each class's facility types, then add them with their own checkboxes ->
+                    <label v-for="code in group.codes" :key="code" class="filters__type">
+                        <input type="checkbox" :value="code" v-model="visibleCodes" />
+                        {{ facilityNameByCode[code] }}
+                    </label>
+                </div>
+            </fieldset>
+        </div>
+
+        <button
+            type="button"
+            class="filter-toggle"
+            aria-label="Facility filters"
+            aria-controls="filter-panel"
+            :aria-expanded="isFilterOpen"
+            @click="isFilterOpen = !isFilterOpen"
+        >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" />
+            </svg>
+        </button>
     </div>
     <div id="bike-map-wrapper">
         <div
@@ -177,5 +225,32 @@ onBeforeUnmount(() => {
             role="region"
             aria-label="Map of Portland bike facilities"
         ></div>
+    </div>
+    <div class="map-legend" role="group" aria-labelledby="legend-heading">
+        <h2 id="legend-heading" class="map-legend__title">Legend</h2>
+
+        <ul class="map-legend__list">
+            <li v-for="group in facilityGroups" :key="group.class">
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" :class="`legend-stroke--class-${group.class}`" />
+            </svg>
+            {{ group.name }}
+            </li>
+        </ul>
+
+        <ul class="map-legend__list">
+            <li>
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" />
+            </svg>
+            Active
+            </li>
+            <li>
+            <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
+                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" stroke-dasharray="10 5" :style="{ strokeOpacity: PLANNED_OPACITY }" />
+            </svg>
+            Planned
+            </li>
+        </ul>
     </div>
 </template>
