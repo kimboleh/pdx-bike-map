@@ -7,11 +7,53 @@
 }
 
 #filter-sidebar {
+    --filter-panel-width: min(300px, calc(100vw - 3.5rem));
+
     position: absolute;
     left: 0;
     margin-top: calc($header-height + 20px);
-    max-width: 300px;
     z-index: 10;
+
+    display: flex;
+    align-items: flex-start;
+    transition: transform 0.3s ease;
+
+    &:not(.is-open) {
+        transform: translateX(calc(-1 * var(--filter-panel-width)));
+    }
+
+    .filter-panel {
+        box-sizing: border-box;
+        width: var(--filter-panel-width);
+        max-height: calc(100vh - #{$header-height} - 40px);
+        overflow-y: auto;
+    }
+
+    &:not(.is-open) .filter-panel {
+        visibility: hidden;
+        transition: visibility 0s linear 0.3s;
+    }
+
+    .filter-toggle {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        background-color: $color--grey;
+        border: solid $color--dark 1px;
+        border-left: none;
+        cursor: pointer;
+
+        svg { transition: transform 0.3s ease; }
+    }
+
+    &:not(.is-open) .filter-toggle svg {
+        transform: rotate(180deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &, .filter-panel, .filter-toggle svg { transition: none; }
+    }
 
     input[type="checkbox"] {
         box-sizing: border-box;

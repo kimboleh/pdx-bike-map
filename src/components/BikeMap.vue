@@ -19,6 +19,7 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 const mapContainer = ref<HTMLDivElement | null>(null);
 const classColors = getClassColors();
 const visibleCodes = ref<string[]>([...allFacilityCodes]);
+const isFilterOpen = ref(true);
 const allOn = (g: FacilityGroup) => g.codes.every((c) => visibleCodes.value.includes(c));
 const someOn = (g: FacilityGroup) => g.codes.some((c) => visibleCodes.value.includes(c));
 
@@ -142,35 +143,50 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div id="filter-sidebar">
-        <fieldset class="filters">
-            <h2><legend>Filter facility types</legend></h2>
-            <!- Loop through each class in facilityGroups ->
-            <div
-                v-for="group in facilityGroups"
-                :key="group.class"
-                class="filters__group"
-                role="group"
-                :aria-labelledby="`class-${group.class}-heading`"
-            >
-                <!- Add the class's heading ->
-                <label class="filters__all">
-                    <input
-                        type="checkbox"
-                        :checked="allOn(group)"
-                        :indeterminate="someOn(group) && !allOn(group)"
-                        @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
-                    />
-                    <h3 :id="`class-${group.class}-heading`">{{ group.name }}</h3>
-                </label>
+    <div id="filter-sidebar" :class="{ 'is-open': isFilterOpen }">
+        <div id="filter-panel" class="filter-panel">
+            <fieldset class="filters">
+                <h2><legend>Filter facility types</legend></h2>
+                <!- Loop through each class in facilityGroups ->
+                <div
+                    v-for="group in facilityGroups"
+                    :key="group.class"
+                    class="filters__group"
+                    role="group"
+                    :aria-labelledby="`class-${group.class}-heading`"
+                >
+                    <!- Add the class's heading ->
+                    <label class="filters__all">
+                        <input
+                            type="checkbox"
+                            :checked="allOn(group)"
+                            :indeterminate="someOn(group) && !allOn(group)"
+                            @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
+                        />
+                        <h3 :id="`class-${group.class}-heading`">{{ group.name }}</h3>
+                    </label>
 
-                <!- Loop through each class's facility types, then add them with their own checkboxes ->
-                <label v-for="code in group.codes" :key="code" class="filters__type">
-                    <input type="checkbox" :value="code" v-model="visibleCodes" />
-                    {{ facilityNameByCode[code] }}
-                </label>
-            </div>
-        </fieldset>
+                    <!- Loop through each class's facility types, then add them with their own checkboxes ->
+                    <label v-for="code in group.codes" :key="code" class="filters__type">
+                        <input type="checkbox" :value="code" v-model="visibleCodes" />
+                        {{ facilityNameByCode[code] }}
+                    </label>
+                </div>
+            </fieldset>
+        </div>
+
+        <button
+            type="button"
+            class="filter-toggle"
+            aria-label="Facility filters"
+            aria-controls="filter-panel"
+            :aria-expanded="isFilterOpen"
+            @click="isFilterOpen = !isFilterOpen"
+        >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" />
+            </svg>
+        </button>
     </div>
     <div id="bike-map-wrapper">
         <div
