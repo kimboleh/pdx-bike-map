@@ -1,5 +1,6 @@
 export const facilityClasses = [1, 2, 3, 4] as const;
 export type FacilityClass = (typeof facilityClasses)[number];
+export const PLANNED_OPACITY = 0.6;
 
 export interface FacilityType {
   code: string,

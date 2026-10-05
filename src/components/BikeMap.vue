@@ -6,12 +6,14 @@ import {
     allFacilityCodes,
     facilityNameByCode,
     getClassColors,
+    PLANNED_OPACITY,
     type FacilityGroup,
 } from '../types/facilityTypes';
 import EsriMap from '@arcgis/core/Map';
 import Graphic from '@arcgis/core/Graphic';
 import MapView from '@arcgis/core/views/MapView';
 import Extent from '@arcgis/core/geometry/Extent';
+import Color from '@arcgis/core/Color';
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer';
 import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -35,6 +37,13 @@ const portlandExtent = new Extent({
     ymax: 45.66,   // north
     spatialReference: { wkid: 4326 },
 });
+
+// helper method to convert a hex code color into an ArcGIS Color
+const withAlpha = (css: string, alpha: number) => {
+    const c = new Color(css);
+    c.a = alpha;
+    return c;
+}
 
 // shows or hides all facility groups within a given class
 function toggleGroup(g: FacilityGroup, on: boolean) {
@@ -88,7 +97,12 @@ onMounted(() => {
             {
                 value: `${f.code}|planned`,
                 label: `${f.name} (planned)`,
-                symbol: { type: 'simple-line', color: classColors[f.class], width: 2, style: 'long-dash' },
+                symbol: {
+                    type: 'simple-line',
+                    color: withAlpha(classColors[f.class], PLANNED_OPACITY),
+                    width: 3,
+                    style: 'long-dash',
+                },
             },
         ]),
     });
@@ -233,7 +247,7 @@ onBeforeUnmount(() => {
             </li>
             <li>
             <svg class="map-legend__line" viewBox="0 0 32 4" aria-hidden="true" focusable="false">
-                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" stroke-dasharray="6 4" />
+                <line x1="0" y1="2" x2="32" y2="2" class="legend-stroke--status" stroke-dasharray="10 5" :style="{ strokeOpacity: PLANNED_OPACITY }" />
             </svg>
             Planned
             </li>
