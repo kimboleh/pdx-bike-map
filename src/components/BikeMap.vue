@@ -109,7 +109,7 @@ onMounted(() => {
 
     // render the GeoJSON and create popups for each facility
     bikeLayer = new GeoJSONLayer({
-        url: '/bike-facilities.geojson',
+        url: `${import.meta.env.BASE_URL}bike-facilities.geojson`,
         title: 'Bike facilities',
         outFields: ['*'],
         renderer,
